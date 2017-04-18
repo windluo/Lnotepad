@@ -1,11 +1,12 @@
 <template>
 	<div class="page-notelist">
-		<div class="notelist" v-for="data in dataList">
+		<div class="notelist" :class="{today:ifToday(data.date)}" v-for="data in dataList">
 			<div class="notelist-head">{{data.date}}</div>
 			<ul class="notelist-list">
 				<li class="notelist-item" v-for="item in data.dataList">
 					<div class="title">{{item.title}}</div>
 					<div class="details">{{item.details}}</div>
+					<div class="time">{{item.time}}</div>
 				</li>
 			</ul>
 		</div>
@@ -53,7 +54,7 @@
 					data.date = this.dateConvert(data.date)
 
 					for (let j = 0; j < data.dataList.length; j++) {
-						data.dataList[j].date = this.timeConvert(data.dataList[j].date)
+						data.dataList[j].time = this.timeConvert(data.dataList[j].time)
 					}
 				}
 			},
@@ -61,19 +62,51 @@
 			dateConvert (val) {
 				let res = ''
 
-				if (new Date(val).getDate() === new Date(this.systime).getDate()) {
+				if (this.ifToday(val)) {
 					res = 'Today'
-				} else if (new Date(val).getDate() === new Date(this.systime).getDate() + 1) {
-					res = 'Tomorrw'
+				} else if (this.ifTomorrow(val)) {
+					res = 'Tomorrow'
 				} else {
-					res = new Date(val).getFullYear() + '-' + (parseInt(new Date(val).getMonth()) + 1) + '-' + new Date(val).getDate()
+					res = new Date(val).getFullYear()
+								+ '-'
+								+ this.completeDigit(parseInt(new Date(val).getMonth()) + 1)
+								+ '-'
+								+ this.completeDigit(new Date(val).getDate())
 				}
 
 				return res
 			},
 
 			timeConvert (val) {
-				return new Date(val).getHours() + ':' + new Date(val).getMinutes() + '-' + new Date(val).getSeconds()
+				return this.completeDigit(new Date(val).getHours())
+							 + ':'
+							 + this.completeDigit(new Date(val).getMinutes())
+			},
+
+			ifToday (val) {
+				if (new Date(val).getDate() === new Date(this.systime).getDate() || val === 'Today') {
+					return true
+				}
+
+				return false
+			},
+
+			ifTomorrow (val) {
+				if (new Date(val).getDate() === new Date(this.systime).getDate() + 1) {
+					return true
+				}
+
+				return false
+			},
+
+			completeDigit (val) {
+				if (val === undefined || val === null) {
+					return
+				} else {
+					let res = '' + Math.floor(val / 10) + Math.floor(val % 10)
+
+					return res
+				}
 			}
 		},
 
@@ -88,12 +121,14 @@
 	.page-notelist{
 		padding-top: .24rem;
 		padding-right: .24rem;
-		padding-left: .48rem;
+		padding-bottom: .24rem;
+		padding-left: 1rem;
 
 		.notelist-head{
 			padding-top: .32rem;
 			padding-bottom: .24rem;
 			position: relative;
+			text-indent: -0.52rem;
 			&:before{
 				content: "";
 				width: 1px;
@@ -101,7 +136,7 @@
 				background: #e5e5e5;
 				position: absolute;
 				top: 0;
-				left: -0.24rem;
+				left: -0.76rem;
 			}
 			&:after{
 				content: "";
@@ -112,11 +147,11 @@
 				border: 2px solid #ff6700;
 				position: absolute;
 				top: 0.36rem;
-				left: -0.32rem;
+				left: -0.84rem;
 			}
 		}
 
-		.notelist-head.today:after{
+		.notelist.today .notelist-head:after{
 			border-color: #47d618;
 		}
 
@@ -129,7 +164,7 @@
 				background: #e5e5e5;
 				position: absolute;
 				top: 0;
-				left: -0.24rem;
+				left: -0.76rem;
 			}
 		}
 
@@ -138,9 +173,22 @@
 			border-radius: .08rem;
 			border: 1px solid #e5e5e5;
 			margin-bottom: .18rem;
+			background: #fff;
 			box-shadow: 2px 2px 2px rgba(140, 140, 140, 0.1);
+			position: relative;
 			&:last-child{
 				margin-bottom: 0;
+			}
+
+			.time{
+				width: 0.6rem;
+				text-align: center;
+				color: #999;
+				font-size: .20rem;
+				position: absolute;
+				top: 50%;
+				left: -0.70rem;
+				transform: translateY(-50%);
 			}
 		}
 
@@ -155,7 +203,7 @@
 
 		@media screen and (max-width: 413px) {
 			.notelist-head:after{
-				left: -0.34rem;
+				left: -0.86rem;
 			}
 		}
 	}

@@ -10,6 +10,8 @@ html{
 }
 
 body{
+	font-family: sans-serif,Helvetica;
 	font-size: 0.22rem;
 	color: #333;
+	background: #f9f9f9;
 }
