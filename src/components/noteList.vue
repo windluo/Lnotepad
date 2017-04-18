@@ -1,21 +1,11 @@
 <template>
 	<div class="page-notelist">
-		<div class="today">
-			<div class="today-head">Today</div>
-			<ul class="today-list">
-				<li class="today-item" v-for="data in todayList">
-					<div class="title">{{data.title}}</div>
-					<div class="details">{{data.details}}</div>
-				</li>
-			</ul>
-		</div>
-
-		<div class="tomorrow">
-			<div class="tomorrow-head">Tomorrow</div>
-			<ul class="tomorrow-list">
-				<li class="tomorrow-item" v-for="data in tomorrowList">
-					<div class="title">{{data.title}}</div>
-					<div class="details">{{data.details}}</div>
+		<div class="notelist" v-for="data in dataList">
+			<div class="notelist-head">{{data.date}}</div>
+			<ul class="notelist-list">
+				<li class="notelist-item" v-for="item in data.dataList">
+					<div class="title">{{item.title}}</div>
+					<div class="details">{{item.details}}</div>
 				</li>
 			</ul>
 		</div>
@@ -26,23 +16,70 @@
 	export default{
 		data () {
 			return {
-				todayList: [
-					{title: '吃饭', details: '中午去XXX吃饭'},
-					{title: '跑步', details: '晚上去公园跑步'}
-				],
-				tomorrowList: [
-					{title: '游玩', details: '去爬山啊'},
-					{title: '吃饭', details: '晚上去某店吃饭'}
-				]
+				systime: '',
+				titleArr: ['吃饭', '跑步', '游玩', '看电影', '玩游戏'],
+				detailsArr: ['去XXX吃饭', '去公园跑步', '去爬山啊', '到XXX看电影', '在家里打游戏'],
+				dataList: []
 			}
 		},
 
 		methods: {
-			
+			createData () {
+				for (let i = 0; i < 4; i++) {
+					let obj = {}
+
+					obj.date = this.systime + ( i * 24 * 60 * 60 * 1000)
+					obj.dataList = []
+					for (let j = 0; j < 2; j++) {
+						let childObj = {}
+						let rand = Math.floor(Math.random() * 5)
+
+						childObj.time = this.systime + ( i * 24 * 60 * 60 * 1000) + (j * 60 * 60 * 1000 * Math.floor(Math.random() * 5))
+						childObj.title = this.titleArr[rand]
+						childObj.details = this.detailsArr[rand]
+
+						obj.dataList.push(childObj)
+					}
+
+					this.dataList.push(obj)
+				}
+
+				this.dataConvert()
+			},
+
+			dataConvert () {
+				for (let i = 0; i < this.dataList.length; i++) {
+					let data = this.dataList[i]
+					data.date = this.dateConvert(data.date)
+
+					for (let j = 0; j < data.dataList.length; j++) {
+						data.dataList[j].date = this.timeConvert(data.dataList[j].date)
+					}
+				}
+			},
+
+			dateConvert (val) {
+				let res = ''
+
+				if (new Date(val).getDate() === new Date(this.systime).getDate()) {
+					res = 'Today'
+				} else if (new Date(val).getDate() === new Date(this.systime).getDate() + 1) {
+					res = 'Tomorrw'
+				} else {
+					res = new Date(val).getFullYear() + '-' + (parseInt(new Date(val).getMonth()) + 1) + '-' + new Date(val).getDate()
+				}
+
+				return res
+			},
+
+			timeConvert (val) {
+				return new Date(val).getHours() + ':' + new Date(val).getMinutes() + '-' + new Date(val).getSeconds()
+			}
 		},
 
 		mounted () {
-			console.log('noteList is ok!')
+			this.systime = (new Date()).getTime()
+			this.createData()
 		}
 	}
 </script>
@@ -53,8 +90,8 @@
 		padding-right: .24rem;
 		padding-left: .48rem;
 
-		.today-head,
-		.tomorrow-head{
+		.notelist-head{
+			padding-top: .32rem;
 			padding-bottom: .24rem;
 			position: relative;
 			&:before{
@@ -74,24 +111,16 @@
 				border-radius: 100%;
 				border: 2px solid #ff6700;
 				position: absolute;
-				top: 0.06rem;
+				top: 0.36rem;
 				left: -0.32rem;
 			}
 		}
 
-		.today-head:after{
+		.notelist-head.today:after{
 			border-color: #47d618;
 		}
 
-		.tomorrow-head{
-			padding-top: .32rem;
-			&:after{
-				top: 0.36rem;
-			}
-		}
-
-		.today-list,
-		.tomorrow-list{
+		.notelist-list{
 			position: relative;
 			&:before{
 				content: "";
@@ -104,8 +133,7 @@
 			}
 		}
 
-		.today-item,
-		.tomorrow-item{
+		.notelist-item{
 			padding: .18rem;
 			border-radius: .08rem;
 			border: 1px solid #e5e5e5;
@@ -126,8 +154,7 @@
 		}
 
 		@media screen and (max-width: 413px) {
-			.today-head:after,
-			.tomorrow-head:after{
+			.notelist-head:after{
 				left: -0.34rem;
 			}
 		}
